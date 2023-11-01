@@ -14,14 +14,14 @@ class TestProject(TestCase):
     def test_fetch_valid(self):
         response = self.client.get("/?city=Amsterdam")
         self.assert200(response)
-        self.assert_template_used('map.html')
+        self.assert_template_used('index.html')
         self.assert_context('current_city', 'Amsterdam')
 
     # test invalid input country
     def test_fetch_invalid(self):
         response = self.client.get("/?city=Germany")
         self.assert200(response)
-        self.assert_template_used('map.html')
+        self.assert_template_used('index.html')
         self.assert_context('error_message', 'Please enter a valid city')
         self.assert_context('current_city', 'Amsterdam')
 
@@ -29,7 +29,7 @@ class TestProject(TestCase):
     def test_invalid_characters_input(self):
         response = self.client.get("/?city=1234")
         self.assert200(response)
-        self.assert_template_used('map.html')
+        self.assert_template_used('index.html')
         self.assert_context('error_message', 'Please enter a valid city')
         self.assert_context('current_city', 'Amsterdam')
 
