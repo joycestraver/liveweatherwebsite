@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css">
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/x-icon">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDX5zOrXBie4OK5KV5wlTUe9kKG9omVJF8"></script>
+    <style>
+        /* style kaart */
+        #map-container {
+            display: flex;
+            flex-direction: row;
+        }
+        #map {
+            z-index: 0;
+        }
+        #info-panel {
+            height: 100%;
+            width: 30%;
+            margin-top: 20px;
+            margin-left: 55px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            z-index: 2;
+        }
+        #map-container {
+        margin-top: 10px;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        /* style search */
+        #search-form {
+            top: 30px;
+            left: 10px;
+            z-index: 2;
+            margin-bottom: 10px;
+            margin-left:20px;
+            margin-right: 20px;
+            margin-top: 15px;
+        }
+
+        #search-form form {
+            display: flex;
+            align-items: center;
+        }
+
+        #search-form label {
+            margin-right: 10px;
+        }
+
+        #search-form input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .city2{
+            color: #555555;
+            font-size: 10px;
+        }
+
+        #search-form button {
+            padding: 5px 10px;
+            background-color: #404040;
+            color: #f5f5f5;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        /* style text en koppen infopanel */
+        .infoheader1{
+            margin-left: 10px;
+            font-family: "Circular", sans-serif;
+            margin-bottom: 10px;
+            color: #555555;
+        }
+        .infoheader2{
+            margin-left: 10px;
+            font-family: "Circular", sans-serif;
+            color: #555555;
+        }
+        .infoheader3{
+            margin-left: 10px;
+            font-family: "Circular", sans-serif;
+            color: #555555;
+        }
+
+        .infotext{
+            margin-left: 10px;
+            margin-top: 10px;
+            font-family: "Circular", sans-serif;
+            color: #555555;
+        }
+        .table-row{
+            line-height: 2.3;
+        }
+        .kolom{
+            padding-left: 20px;
+        }
+        /* style search history */
+        #cityhistory {
+        padding: 10px;
+        margin-top: 35px;
+        }
+
+        #cityhistory h5 {
+        margin: 0;
+        }
+
+        #cityhistory ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 5px;
+        }
+        #cityhistory a {
+            color: grey;
+            margin-left: 20px;
+        }
+
+
+        /* style animations clouds*/
+        #cloud-animation {
+            position: absolute;
+            display: right;
+            margin-top: 200px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='cloud.png') }}");
+            animation: cloudMove 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #cloud-animation1 {
+            position: absolute;
+            display: right;
+            margin-top: 250px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='cloud.png') }}");
+            animation: cloudMove1 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #cloud-animation2 {
+            position: absolute;
+            display: right;
+            margin-top: 300px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='cloud.png') }}");
+            animation: cloudMove2 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #cloud-animation3 {
+            position: absolute;
+            display: right;
+            margin-top: 350px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='cloud.png') }}");
+            animation: cloudMove3 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        /* animations */
+        @keyframes cloudMove {
+            0% {
+                left: 10%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        @keyframes cloudMove1 {
+            0% {
+                left: 20%;
+            }
+            100% {
+                left: 110%;
+            }
+        }
+        @keyframes cloudMove2 {
+            0% {
+                left: 10%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        @keyframes cloudMove3 {
+            0% {
+                left: 15%;
+            }
+            100% {
+                left: 105%;
+            }
+        }
+
+
+
+        /* style animations sun*/
+        #sun-animation2 {
+            position: absolute;
+            display: right;
+            margin-top: 300px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='sun.png') }}");
+            animation: cloudMove2 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+
+
+        /* style animations rain*/
+        #rain-animation {
+            position: absolute;
+            display: right;
+            margin-top: 200px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='raining.png') }}");
+            animation: cloudMove 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #rain-animation1 {
+            position: absolute;
+            display: right;
+            margin-top: 250px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='raining.png') }}");
+            animation: cloudMove1 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #rain-animation2 {
+            position: absolute;
+            display: right;
+            margin-top: 300px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='raining.png') }}");
+            animation: cloudMove2 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #rain-animation3 {
+            position: absolute;
+            display: right;
+            margin-top: 350px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='raining.png') }}");
+            animation: cloudMove3 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        /* style animations snow*/
+        #snow-animation {
+            position: absolute;
+            display: right;
+            margin-top: 200px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='snow.png') }}");
+            animation: cloudMove 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #snow-animation1 {
+            position: absolute;
+            display: right;
+            margin-top: 250px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='snow.png') }}");
+            animation: cloudMove1 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #snow-animation2 {
+            position: absolute;
+            display: right;
+            margin-top: 300px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='snow.png') }}");
+            animation: cloudMove2 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #snow-animation3 {
+            position: absolute;
+            display: right;
+            margin-top: 350px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='snow.png') }}");
+            animation: cloudMove3 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        /* style animations storm/thunder*/
+        #storm-animation {
+            position: absolute;
+            display: right;
+            margin-top: 200px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='storm.png') }}");
+            animation: cloudMove 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #storm-animation1 {
+            position: absolute;
+            display: right;
+            margin-top: 250px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='storm.png') }}");
+            animation: cloudMove1 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #storm-animation2 {
+            position: absolute;
+            display: right;
+            margin-top: 300px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='storm.png') }}");
+            animation: cloudMove2 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #storm-animation3 {
+            position: absolute;
+            display: right;
+            margin-top: 350px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='storm.png') }}");
+            animation: cloudMove3 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        /* style animations fog*/
+        #fog-animation {
+            position: absolute;
+            display: right;
+            margin-top: 200px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='fog.png') }}");
+            animation: cloudMove 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #fog-animation1 {
+            position: absolute;
+            display: right;
+            margin-top: 250px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='fog.png') }}");
+            animation: cloudMove1 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #fog-animation2 {
+            position: absolute;
+            display: right;
+            margin-top: 300px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='fog.png') }}");
+            animation: cloudMove2 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #fog-animation3 {
+            position: absolute;
+            display: right;
+            margin-top: 350px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='fog.png') }}");
+            animation: cloudMove3 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        /* style animations wind*/
+        #wind-animation {
+            position: absolute;
+            display: right;
+            margin-top: 200px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='wind.png') }}");
+            animation: cloudMove 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #wind-animation1 {
+            position: absolute;
+            display: right;
+            margin-top: 250px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='wind.png') }}");
+            animation: cloudMove1 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #wind-animation2 {
+            position: absolute;
+            display: right;
+            margin-top: 300px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='wind.png') }}");
+            animation: cloudMove2 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+        #wind-animation3 {
+            position: absolute;
+            display: right;
+            margin-top: 350px;
+            width: 200px;
+            height: 200px;
+            background: url("{{ url_for('static', filename='wind.png') }}");
+            animation: cloudMove3 10s linear infinite;
+            z-index: 1;
+            filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.3));
+        }
+
+    </style>
+</head>
+<body>
+    <!-- animaties -->
+    <div>
+        {% if "cloud" in weatherdes.lower() or "cloudy" in weatherdes.lower() or "overcast" in weatherdes.lower() %}
+        <div id="cloud-animation"></div>
+        <div id="cloud-animation1"></div>
+        <div id="cloud-animation2"></div>
+        <div id="cloud-animation3"></div>
+        {% endif %}
+    </div>
+    <div>
+        {% if "sunny" in weatherdes.lower() or "sun" in weatherdes.lower() %}
+        <div id="sun-animation2"></div>
+        {% endif %}
+    </div>
+    <div>
+        {% if "rain" in weatherdes.lower() or "drizzle" in weatherdes.lower() %}
+        <div id="rain-animation"></div>
+        <div id="rain-animation1"></div>
+        <div id="rain-animation2"></div>
+        <div id="rain-animation3"></div>
+        {% endif %}
+    </div>
+    <div>
+        {% if "snow" in weatherdes.lower() or "snowy" in weatherdes.lower() or "blizzard" in weatherdes.lower()%}
+        <div id="snow-animation"></div>
+        <div id="snow-animation1"></div>
+        <div id="snow-animation2"></div>
+        <div id="snow-animation3"></div>
+        {% endif %}
+    </div>
+    <div>
+        {% if "thunder" in weatherdes.lower() or "storm" in weatherdes.lower() %}
+        <div id="storm-animation"></div>
+        <div id="storm-animation1"></div>
+        <div id="storm-animation2"></div>
+        <div id="storm-animation3"></div>
+        {% endif %}
+    </div>
+    <div>
+        {% if "fog" in weatherdes.lower() or "mist" in weatherdes.lower() %}
+        <div id="fog-animation"></div>
+        <div id="fog-animation1"></div>
+        <div id="fog-animation2"></div>
+        <div id="fog-animation3"></div>
+        {% endif %}
+    </div>
+    <div>
+        {% if "wind" in weatherdes.lower() %}
+        <div id="wind-animation"></div>
+        <div id="wind-animation1"></div>
+        <div id="wind-animation2"></div>
+        <div id="wind-animation3"></div>
+        {% endif %}
+    </div>
+    <!-- geef kaart weer -->
+    <div id="map-container">
+        <div id="map">
+            {{ map_html | safe }}
+        </div>
+        <div id="info-panel">
+            <!-- geef info panel weer met dynamische variabelen -->
+            <h4 class="infoheader1"><b>LIVE WEATHER INFORMATION</b></h4>
+            <table class = "infoheader1">
+                <tr class="table-row">
+                    <td class="infoheader2"><b>Current city:</b></td>
+                    <td class="kolom"><b>{{ current_city }}</b></td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infoheader3"><b>The weather:</b></td>
+                    <td class="kolom"><b>{{ weatherdes }}</b></td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Temperature:</b></td>
+                    <td class="kolom">{{ temperature }} °C</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Feels like:</b></td>
+                    <td class="kolom">{{ feelslike }} °C</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Humidity:</b></td>
+                    <td class="kolom">{{ humidity }} %</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Wind speed:</b></td>
+                    <td class="kolom">{{ wind_speed }} km/u</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Wind direction:</b></td>
+                    <td class="kolom">{{ winddir }}: {{ new_wind }}</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Pressure:</b></td>
+                    <td class="kolom">{{ pressure }} MB</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Precipitation:</b></td>
+                    <td class="kolom">{{ precipitation }} mm</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Cloud cover:</b></td>
+                    <td class="kolom">{{ cloudcover }} %</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>UV index:</b></td>
+                    <td class="kolom">{{ uv }}</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Visibility:</b></td>
+                    <td class="kolom">{{ visibility }} km</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Local time in {{ current_city }}:</b></td>
+                    <td class="kolom">{{ local_time_city_after }}</td>
+                </tr>
+                <tr class="table-row">
+                    <td class="infotext"><b>Last updated:</b></td>
+                    <td class="kolom">{{ time_24 }}</td>
+                </tr>
+            </table>
+            <div id="search-form">
+                <!-- geef zoekbalk weer -->
+                <form method="GET" action="/">
+                    <label class="city2" for="city">SEARCH A CITY:</label>
+                    <!-- wanneer input goed is staat er in de zoekbalk: Enter a city, wanneer de input fout is staat er: Please enter a valid city en komt er een rode rand om de zoekbalk-->
+                    <input type="text" id="city" name="city" placeholder="{% if error_message %}Please enter a valid city{% else %}Enter a city{% endif %}" {% if error_message %}style="border: 1px solid red;"{% endif %}>
+                    <button type="submit"><b>search</b></button>
+                </form>
+            </div>
+            <!-- geef search history weer -->
+            <div id="cityhistory">
+                <h5 class="infoheader3"><b>SEARCH HISTORY</b>     <a href="/clear_history">clear history</a></h5>
+                <ul>
+                    {% for city in city_history %}
+                    <!-- maak de history een link zodat de gebruiker terug kan -->
+                    <li><a href="/?city={{ city }}">{{ city }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
