@@ -166,9 +166,9 @@ def main():
 
 
     # geneer de kaart en geneer het html bestand met variabelen
-    map_html = m.get_root().render()
-    return render_template("map.html",
-                           map_html=map_html,
+    index_html = m.get_root().render()
+    return render_template("index.html",
+                           index_html=index_html,
                            temperature=temperature,
                            humidity=humidity,
                            wind_speed=wind_speed,
